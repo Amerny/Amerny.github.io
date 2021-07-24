@@ -35,16 +35,17 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="用户级线程用户线程指不需要内核支持而在用户程序中实现的线程，其不依赖于操作系统核心，应用进程利用线程库提供创建、同步、调度和管理线程的函数来控制用户线程。不需要用户态&#x2F;核心态切换，速度快，操作系统内核不知道多线程的存在，因此一个线程阻塞将使得整个进程（包括它的所有线程）阻塞。由于这里的处理器时间片分配是以进程为基本单位，所以每个线程执行的时间相对减少。">
+  <meta name="description" content="@TOC 用户级线程用户线程指不需要内核支持而在用户程序中实现的线程，其不依赖于操作系统核心，应用进程利用线程库提供创建、同步、调度和管理线程的函数来控制用户线程。不需要用户态&#x2F;核心态切换，速度快，操作系统内核不知道多线程的存在，因此一个线程阻塞将使得整个进程（包括它的所有线程）阻塞。由于这里的处理器时间片分配是以进程为基本单位，所以每个线程执行的时间相对减少。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="进程和线程">
 <meta property="og:url" content="http://example.com/2021/07/21/%E8%BF%9B%E7%A8%8B%E5%92%8C%E7%BA%BF%E7%A8%8B/index.html">
 <meta property="og:site_name" content="Amerny">
-<meta property="og:description" content="用户级线程用户线程指不需要内核支持而在用户程序中实现的线程，其不依赖于操作系统核心，应用进程利用线程库提供创建、同步、调度和管理线程的函数来控制用户线程。不需要用户态&#x2F;核心态切换，速度快，操作系统内核不知道多线程的存在，因此一个线程阻塞将使得整个进程（包括它的所有线程）阻塞。由于这里的处理器时间片分配是以进程为基本单位，所以每个线程执行的时间相对减少。">
+<meta property="og:description" content="@TOC 用户级线程用户线程指不需要内核支持而在用户程序中实现的线程，其不依赖于操作系统核心，应用进程利用线程库提供创建、同步、调度和管理线程的函数来控制用户线程。不需要用户态&#x2F;核心态切换，速度快，操作系统内核不知道多线程的存在，因此一个线程阻塞将使得整个进程（包括它的所有线程）阻塞。由于这里的处理器时间片分配是以进程为基本单位，所以每个线程执行的时间相对减少。">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2021-07-21T11:24:32.000Z">
-<meta property="article:modified_time" content="2021-07-24T12:57:39.472Z">
+<meta property="article:modified_time" content="2021-07-24T15:39:46.399Z">
 <meta property="article:author" content="Amerny">
+<meta property="article:tag" content="进程、线程、调度">
 <meta name="twitter:card" content="summary">
 
 <link rel="canonical" href="http://example.com/2021/07/21/%E8%BF%9B%E7%A8%8B%E5%92%8C%E7%BA%BF%E7%A8%8B/">
@@ -218,7 +219,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-07-24 20:57:39" itemprop="dateModified" datetime="2021-07-24T20:57:39+08:00">2021-07-24</time>
+                <time title="修改时间：2021-07-24 23:39:46" itemprop="dateModified" datetime="2021-07-24T23:39:46+08:00">2021-07-24</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -241,7 +242,8 @@
     <div class="post-body" itemprop="articleBody">
     
       
-        <h1 id="用户级线程"><a href="#用户级线程" class="headerlink" title="用户级线程"></a><center>用户级线程</center></h1><p><strong>用户线程</strong>指不需要内核支持而在用户程序中实现的线程，其不依赖于操作系统核心，应用进程利用线程库提供创建、同步、调度和管理线程的函数来控制用户线程。不需要用户态/核心态切换，速度快，操作系统内核不知道多线程的存在，因此一个线程阻塞将使得整个进程（包括它的所有线程）阻塞。由于这里的处理器时间片分配是以进程为基本单位，所以每个线程执行的时间相对减少。</p>
+        <p>@<a href="%E6%96%87%E7%AB%A0%E7%9B%AE%E5%BD%95">TOC</a></p>
+<h1 id="用户级线程"><a href="#用户级线程" class="headerlink" title="用户级线程"></a><center>用户级线程</center></h1><p><strong>用户线程</strong>指不需要内核支持而在用户程序中实现的线程，其不依赖于操作系统核心，应用进程利用线程库提供创建、同步、调度和管理线程的函数来控制用户线程。不需要用户态/核心态切换，速度快，操作系统内核不知道多线程的存在，因此一个线程阻塞将使得整个进程（包括它的所有线程）阻塞。由于这里的处理器时间片分配是以进程为基本单位，所以每个线程执行的时间相对减少。</p>
 <span id="more"></span>
 
 <p><font color=red>优点</font></p>
@@ -255,8 +257,6 @@
 <li>一个线程开始运行，那么该进程中的其他线程就不能运行，除非第一个线程自动放弃cpu。<u>在一个单独的进程内部，没有时钟中断，所以不可能用轮转调度的方式调度线程,除非某个线程能够按照自己的意志进入运行时系统，否则调度程序就没有任何机会</u>。</li>
 </ul>
 <h1 id="内核级线程"><a href="#内核级线程" class="headerlink" title="内核级线程"></a><center>内核级线程</center></h1><p><strong>内核线程</strong>：由操作系统内核创建和撤销。内核维护进程及线程的上下文信息以及线程切换。一个内核线程由于I/O操作而阻塞，不会影响其它线程的运行。Windows NT和2000/XP支持内核线程。</p>
-<!-- More -->
-
 <p><strong>内核中有用来记录系统中所有线程的线程表</strong></p>
 <p><strong>用户级线程中，运行时系统始终运行自己进程中的线程，直到内核剥夺cpu；内核级线程中，但一个线程阻塞时，，内核根据其选择可以运行同一个进程中的另一个线程或者另一个进程中的线程。</strong></p>
 <p><font color=red>优点</font></p>
@@ -299,23 +299,40 @@
 <p>会有忙等待的缺点。</p>
 <p><font color=red>5.TSL指令</font> </p>
 <p><code>TSL RX,LOCK</code>：称为测试并加锁。将一个内存字lock读到寄存器RX中，然后在该内存地址上存一个非零值。读字和写字操作保证是不可分割的。此处说明，<strong>锁住存储线不同于屏蔽中断</strong>，处理器1屏蔽中断对于处理器2没有任何影响。</p>
-<p>当lock为0时，任何进程都可以使用TSL指令将其设置为1，并且读写共享内存，操作结束使用一条move指令将lock的值重新设置为0。</p>
+<p>当lock为0时，任何进程都可以使用TSL指令将其设置为1，并且读写共享内存，操作结束使用一条move指令将lock的值重新设置为0.</p>
+<p>enter_region进入临界区调用，出临界区调用leave_region。</p>
 <p>会有忙等待的缺点。</p>
 <p><big><font color=blue>睡眠与唤醒</font></big></p>
 <p>优先级反转问题：高优先级的进程一直忙等待，而低优先级的进程占领临界区。</p>
 <p><font color=red>生产者-消费者问题</font></p>
 <p>解决方法——加一个唤醒等待位（对于两个进程而言)，因此引出信号量。</p>
-<p>==信号量==</p>
+<p><mark>信号量</mark></p>
 <p>若一个信号量大于0，则执行一个down操作（即sleep），若该值为0，则进程将睡眠，而且此时down操作并未结束。检查数值，修改变量值以及可能发生的睡眠操作均作为一个单一的、不可分割的<strong>原子操作</strong>。</p>
 <p>如果一个或多个进程在该信号量上睡眠，无法完成先前的一个down操作，则由系统选择其中的一个并允许该进程完成他的down操作。</p>
 <p><font color=green>用信号量解决生产者-消费者问题</font></p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">Semaphore mutex = <span class="number">1</span>; </span><br><span class="line">Semaphore full = <span class="number">0</span>; </span><br><span class="line"><span class="keyword">int</span> in = <span class="number">0</span>，out = <span class="number">0</span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">producer</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">while</span>(TRUE)</span><br><span class="line">	&#123;</span><br><span class="line">		item = produce_item();</span><br><span class="line">		P(mutex);				<span class="comment">//进入临界区</span></span><br><span class="line">		Buffer(in) = item;			<span class="comment">//新生产的数据项放入缓冲区</span></span><br><span class="line">		in = in + <span class="number">1</span>;				<span class="comment">//因无界，无需考虑输入指针越界</span></span><br><span class="line">		V(mutex);				<span class="comment">//离开临界区</span></span><br><span class="line">		V(full);				<span class="comment">//增加已用缓冲区的数目</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">consumer</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> item;</span><br><span class="line">	<span class="keyword">while</span>(TRUE)</span><br><span class="line">	&#123;</span><br><span class="line">		P(full);			<span class="comment">//等待已用缓冲区的数目非0</span></span><br><span class="line">		P(mutex);			<span class="comment">//进入临界区</span></span><br><span class="line">		item = Buffer(out);		<span class="comment">//新生产的数据项放入缓冲区</span></span><br><span class="line">		out = out + <span class="number">1</span>;			<span class="comment">//因无界，无需考虑输出指针越界</span></span><br><span class="line">		V(mutex);			<span class="comment">//离开临界区</span></span><br><span class="line">		consume_item(item);		<span class="comment">//处理取出的数据项</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>该解决方案使用了三个信号量：一个称为full，用来记录充满缓冲槽数目，一个称为empty，记录空的缓冲槽总数；一个称为mutex，用来确保生产者和消费者不会同时访问缓冲区。full的初值为0，empty的初值为缓冲区中槽的数目，mutex的初值为1。供两个或多个进程使用的信号量，其初值为1，保证同时只有一个进程可以进入临界区，称作<b>二元信号量</b>。如果每个进程在进入临界区前都执行down操作，并在刚刚退出时执行一个up操作，就能够实现互斥。</p>
-<p>==互斥量==</p>
-<p>信号量的简化版，没有计数能力。是一个处于解锁和加锁状态的变量，0表示解锁，其他值则表示加锁</p>
-<p>==管程==</p>
-<p>==消息传递==</p>
+<p><mark>互斥量</mark></p>
+<p>信号量的简化版，没有计数能力。是一个处于解锁和加锁状态的变量，0表示解锁，其他值则表示加锁。用户级线程包mutex_lock的代码实现和enter_region的代码实现的根本区别是<font color=orange>前者取锁失败，会调用thread_yied放弃cpu给另一个线程，这样就没有忙等待。</font> </p>
+<p>用户级线程包中，多个线程访问同一个互斥量是没有问题的，因为所有的线程都在一个公共地址空间中操作。如果进程有不连续的地址空间呢，如何共享turn变量。这里有方案如下，第一种是有些数据结构（信号量）可以放在内核中，并且只能通过系统调用来访问；第二种是让进程与其他进程共享其部分地址空间。</p>
+<p><font color=purple>快速用户区互斥量futex</font>——Linux的一个特性</p>
+<p>一个futex包含两个部分，一个内核服务和一个用户库，内核服务提供一个等待队列，允许多个进程在一个锁上等待，没有竞争时，futex完全在用户区工作。</p>
+<p>对于一个锁处于释放状态，线程通过原子操作”减少并检验“来夺取锁，接下来这个线程检查结果，看锁是否被释放，如果处于被锁状态，那么一切顺利，我们的线程成功夺取该锁，然而如果该锁被另一个线程持有，那么该线程必须等待。这种情况下爱，futex库不自旋，而是使用一个系统调用把这个线程放在内核的等待队列上；当一个线程使用完该锁时，通过原子操作”增加并检验“来释放锁，并检查结果，看是否仍有进程阻塞在内核等待队列上，如果有，则通知内核可以对等待队列上的一个或多个进程解除阻塞；如果没有锁竞争，则内核不需要参与其中。</p>
+<p><font color=purple>pthread中的互斥量</font></p>
+<p>创建和撤销互斥量的函数调用分别是pthread_mutex_init和pthread_mutex_destroy,也可以通过pthread_mutex_lock给互斥量上锁。</p>
+<p>除了互斥量，Pthread还提供了另一种同步机制：<strong>条件变量</strong>，允许线程由于一些未达到条件而阻塞。条件变量上的主要操作是pthread_cond_wait和pthread_cond_signal，前者阻塞调用线程直到另一线程向他发信号（使用后一个调用）。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">#include&lt;pthread.h&gt;</span><br><span class="line">#include&lt;stdio.h&gt;</span><br><span class="line">#include&lt;stdlib.h&gt;</span><br><span class="line"> </span><br><span class="line">#define MAX 1000</span><br><span class="line"> </span><br><span class="line">pthread_mutex_t the_mutex;//互斥量</span><br><span class="line"> </span><br><span class="line">pthread_cond_t condc,condp;//条件变量</span><br><span class="line"> </span><br><span class="line">int buffer=0;//缓冲内容</span><br><span class="line"> </span><br><span class="line">void *producer(void *ptr)</span><br><span class="line">&#123;   </span><br><span class="line">    for(int i=1;i&lt;=MAX;i++)</span><br><span class="line">    &#123;</span><br><span class="line">        pthread_mutex_lock(&amp;the_mutex);//互斥使用缓冲区</span><br><span class="line">        while(buffer!=0)</span><br><span class="line">        &#123;</span><br><span class="line">            pthread_cond_wait(&amp;condp,&amp;the_mutex);//阻塞以等待信号</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        buffer=i;</span><br><span class="line">        printf(&quot;producer %d\n&quot;,i);</span><br><span class="line">        pthread_cond_signal(&amp;condc);//向另一个进程发出信号唤醒</span><br><span class="line">        pthread_mutex_unlock(&amp;the_mutex);//释放缓冲区</span><br><span class="line">    &#125;</span><br><span class="line">    pthread_exit(0);</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">void *consumer(void *ptr)</span><br><span class="line">&#123;</span><br><span class="line">    int i;</span><br><span class="line">    for(i=1;i&lt;=MAX;i++)</span><br><span class="line">    &#123;</span><br><span class="line">        pthread_mutex_lock(&amp;the_mutex);</span><br><span class="line">        while(buffer==0)</span><br><span class="line">            pthread_cond_wait(&amp;condc,&amp;the_mutex);</span><br><span class="line">        printf(&quot;consumer %d\n&quot;,buffer);</span><br><span class="line">        buffer=0;</span><br><span class="line">        pthread_cond_signal(&amp;condp);</span><br><span class="line">        pthread_mutex_unlock(&amp;the_mutex);</span><br><span class="line">    &#125;</span><br><span class="line">    pthread_exit(0);</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    pthread_t pro,con;//线程号</span><br><span class="line">    pthread_mutex_init(&amp;the_mutex,0);//创建一个互斥变量</span><br><span class="line">    pthread_cond_init(&amp;condc,0);//创建一个条件变量</span><br><span class="line">    pthread_cond_init(&amp;condp,0);</span><br><span class="line">    pthread_create(&amp;con,0,consumer,NULL);//创建线程</span><br><span class="line">    pthread_create(&amp;pro,0,producer,NULL);</span><br><span class="line">    pthread_join(pro,0);//如果没有pthread_join；主线程会很快结束从而使整个进程结束，从而使创建的线程没有机会开始执行就结束了</span><br><span class="line">    pthread_join(con,0);//加入pthread_join后，主线程会一直等待直到等待的线程结束自己才结束，使创建的线程有机会执行</span><br><span class="line">    //pthread_join函数会让主线程阻塞，直到所有线程都已经退出</span><br><span class="line"> </span><br><span class="line">    pthread_cond_destroy(&amp;condc);//销毁条件变量</span><br><span class="line">    pthread_cond_destroy(&amp;condp);</span><br><span class="line">    pthread_mutex_destroy(&amp;the_mutex);//销毁互斥变量</span><br><span class="line"> </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p><font color=red>注意：</font> 条件变量（不像信号变量）不会存在内存中。如果将一个信号传递给一个没有线程在等待的条件变量，那么这个信号就会丢失。</p>
+<p><mark>管程</mark></p>
+<p>由过程、变量及数据结构等组成的一个集合，组成一个特殊的模块或软件包。<font color=red>管程有一个很重要的特性是任一时刻只能有一个活跃进程。</font>进入管程时的互斥有编译器负责，任一时刻，写管程的人无需关注编译器是如何实现互斥的，只需知道所有的临界区转换为管程过程即可，绝不会有两个进程同时执行临界区中的代码。</p>
+<p>管程是一个编程语言概念。如果一个分布式系统具有多个cpu，并且每一个cpu拥有自己的私有内存，它们通过一个局域网连接，那么这些原语将失效，结论是，信号量太低级了，管程在少数几种编程语言之外无法使用，并且这些原语均为提供机器间的信息交换方法。因此引出消息传递。</p>
+<p><mark>消息传递</mark></p>
+<p>进程间的通信方法使用两条原语send和receive，为了防止信息丢失，一旦接收信息，立马发回一条特殊的确认信息。<strong>信箱</strong>，用来对一定数量的消息进行缓冲的地方，当一个进程试图向一个满的信箱发消息时，它将被挂起。</p>
+<p><mark>屏障</mark></p>
+<p>——用于进程组，而不是用户双进程的生产者-消费者问题。当一个进程到达屏障时，就被屏障阻拦，直到所有进程都到达该屏障为止。</p>
+<p><font color=red>避免锁：读-复制-更新</font> ——某些情况下，允许写操作来更新数据结构，即便还有其他进程正在使用它，方法是确保每个读操作要么读取旧的版本，要么读取新的版本，决不能是新旧数据的奇怪组合。</p>
 <h1 id="调度"><a href="#调度" class="headerlink" title="调度"></a><center>调度</center></h1><p><strong>调度程序</strong>：完成选择工作的部分，该程序使用的算法就是<strong>调度算法。</strong></p>
 <p><i>进程行为</i>：几乎所有进程的计算和I/O请求都是交替突发的。具体分为<strong>计算密集型</strong>和<strong>I/O密集型</strong>。有必要说明的是，随着cpu的速度越来越快，导致cpu的改进比磁盘的改进快得多，因此更多的进程倾向于I/O密集型。</p>
 <p>对于什么时候调度主要分为<strong>非抢占式调度</strong>和<strong>抢占式调度</strong>。前者是挑选一个进程然后让其运行直至被阻塞（阻塞在I/O上或者等待另一个进程），或者直到该进程自动放弃cpu。这样做的结果是时钟中断发生时不会发生调度。在处理完时钟中断之后如果没有更高优先级的进程等待就继续完成被中断的进程。后者则是让该进程运行某个固定时段的最大值，如果这个时段结束，它仍在运行就挂起并选择另一个进程运行（如果存在另一个就绪的进程）。抢占式调度处理时，<u>需要在时间间隔的末端发生时钟中断，以便把cpu控制返回给调度程序。</u></p>
@@ -361,6 +378,9 @@
     </div>
     
       <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E8%BF%9B%E7%A8%8B%E3%80%81%E7%BA%BF%E7%A8%8B%E3%80%81%E8%B0%83%E5%BA%A6/" rel="tag"><i class="fa fa-tag"></i># 进程、线程、调度</a>
+          </div>
     
         
 
@@ -459,7 +479,7 @@
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-count">2</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
