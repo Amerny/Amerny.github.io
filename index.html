@@ -216,7 +216,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-09-12 22:24:27" itemprop="dateModified" datetime="2021-09-12T22:24:27+08:00">2021-09-12</time>
+                <time title="修改时间：2021-09-12 22:28:26" itemprop="dateModified" datetime="2021-09-12T22:28:26+08:00">2021-09-12</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -239,234 +239,15 @@
     <div class="post-body" itemprop="articleBody">
     
       
-          <span id="more"></span>
-
-<h3 id="寄存器"><a href="#寄存器" class="headerlink" title="寄存器"></a>寄存器</h3><p><font color=red>8086CPU所有寄存器都是16位的</font></p>
-<p>通用寄存器：ax,bx,cx,dx 。都可以分为ah和al，各8位</p>
-<blockquote>
-<p>cx 循环结构的循环次数记录</p>
-</blockquote>
-<p>段寄存器：cs,ds,es,ss。8086CPU不支持数据直接送入段寄存器</p>
-<blockquote>
-<p>cs ：代码段寄存器</p>
-<p>ds：要访问的数据段的段地址，读写一个内存单元</p>
-<p>ss：栈顶的段地址，</p>
-</blockquote>
-<blockquote>
-<p>si和di和bx的功能相近，不能够分成两个8位寄存器</p>
-<p>bp寄存器</p>
-</blockquote>
-<p>标志寄存器flag![截屏2021-09-08 下午9.30.50](汇编小结/截屏2021-09-08 下午9.30.50.png)</p>
-<blockquote>
-<p>ZF：零标志位，记录相关指令执行之后的结果，zf=1，结果为0；zf=0，结果不为0</p>
-<p>PF：奇偶标志位，记录相关指令执行之后的结果，pf=1，结果所有位中1的个数为偶        数；pf=0，1的个数为奇数</p>
-<p>SF：符号标志位，记录相关指令执行之后的结果，sf=1，结果为负；sf=0，结果非负</p>
-<p>CF：进位标志位，记录无符号数运算的时候，记录最高有效位向更高位的进位值或者借        位值，有进位或者借位，cf=1；没有则cf=0</p>
-<p>OF：溢出标志位，记录有符号数运算的结果是否发生了溢出，如果发生溢出of=1；</p>
-<p>DF：方向标志位，串处理指令中，控制每次操作后si，di的增减，df=0，si和di增；</p>
-</blockquote>
-<p>![截屏2021-09-09 上午10.33.35](汇编小结/截屏2021-09-09 上午10.33.35.png)</p>
-<hr>
-<p><font color=red>8086CPU任意时刻，将CS：IP指向的内容当做指令进行</font>——CS*16+IP的单元开始执行，然后IP值增加当前指令的长度。简要执行过程如下</p>
-<blockquote>
-<ol>
-<li>从CS：IP指向的内存单元读取指令，读取的指令进入指令缓冲器</li>
-<li>IP=IP+所读指令的长度，从而指向下一条指令</li>
-<li>执行指令，回到1</li>
-</ol>
-</blockquote>
-<p>Debug功能的常用命令汇总</p>
-<blockquote>
-<ul>
-<li>R 命令查看、改变CPU的寄存器的内容。用法<code>r</code>或者<code>r ax</code></li>
-<li>D命令查看内存中的内容。用法<code>d 段地址（段寄存器）：偏移地址</code>，列出128个内存单元内容</li>
-<li>E命令改写内存中的内容。<code>e 起始地址 数据  数据  </code></li>
-<li>U命令将机器指令翻译成汇编指令。用法<code>u 段地址：偏移地址</code></li>
-<li>T命令执行一条机器指令。<code>t</code>执行当前CS：IP指向的命令</li>
-<li>A以汇编指令的格式在内存中写入一条机器指令。用法<code> a 段地址：偏移地址</code></li>
-</ul>
-</blockquote>
-<p><font color=red>8086CPU任意时刻,SS:SP指向栈顶元素</font></p>
-<p><code>push ax</code>的过程</p>
-<blockquote>
-<ol>
-<li>sp=sp-2, ss:sp指向栈顶前面的单元，以当前栈的,以当前栈顶前面的单元为新的栈顶；</li>
-<li>将ax中的内容送入SS：SP的内存单元处，SS：SP此时指向新栈顶。</li>
-</ol>
-</blockquote>
-<p>![截屏2021-09-07 下午5.23.17](汇编小结/截屏2021-09-07 下午5.23.17.png)</p>
-<p>pop ax的过程和push相反。</p>
-<p><img src="%E6%B1%87%E7%BC%96%E5%B0%8F%E7%BB%93/image-20210907204650967.png" alt="image-20210907204650967"></p>
-<p><font color=red>在8086中，只有bx，si，di，bp这四个寄存器可以用在[ ]..中进行内存单元的寻址，并且只能以单个出现，或者4种组合：bx和di，bx和si，bp和di，bp和si并且都可以加上常数或者立即数idata</font>，但凡包含bp，段地址都在ss中，其他组合的段地址在ds中。</p>
-<h3 id="常见指令"><a href="#常见指令" class="headerlink" title="常见指令"></a>常见指令</h3><p><code>mov ax,[bx] </code>：bx中存放的数据作为一个偏移地址EA，段地址SA默认在ds中，将SA：EA                            的数据送入ax。</p>
-<p><code>mov [bx],ax</code>：原理同上，ax中的数据送入内存SA：EA中。    </p>
-<p><code>mov ax,[bx+200]</code>：ds：200+bx中的数值或者也可以写成 mov ax,200[bx];mov ax,[bx].200 。</p>
-<p><code>mov ax,[bx+si]</code>：ax=ds*16+bx的值+si的值，也可以写成<code>mov ax,[bx][si]</code>。</p>
-<p><code>mov ax,[bx+si+200]</code>：ax=ds*16+bx值+si值+200，也可以写成<code>mov ax,200[bx][si]</code>/<code>mov [bx].200[si]</code>/<code>mov [bx][si].200</code>。</p>
-<p><code>inc bx</code>：bx中的内容加一。</p>
-<p><code>loop s</code>：cx=cx-1     -&gt;      判断cx的值，不为0则转至标号s的地址处执行。</p>
-<p><font color=red>汇编源程序中，数据不能以字母开头，可以前面加0代替</font></p>
-<p>debug中的<code>mov ax,[0]</code>表示把ds：0处的数据送入ax；masm中的<code>mov ax,[0]</code>表示把常量0送入ax,解决方法是在 []的前面显示给出段地址的段寄存器。</p>
-<p><font color=green>描述性符号reg和sreg，reg表示一个寄存器；sreg表示一个段寄存器，包括ds,ss,cs,es</font></p>
-<h4 id="字长的处理"><a href="#字长的处理" class="headerlink" title="字长的处理"></a>字长的处理</h4><p>可以处理byte和word两种数据，1个word=2个byte</p>
-<ul>
-<li><p>通过寄存器指明要处理的尺寸</p>
-<p>ax，bx，ds，表示字操作；al，bl表示字节操作</p>
-</li>
-<li><p>没有寄存器指明的情况下，用 word ptr或者 byte ptr指明内存单元的长度。</p>
-<p>比如move byte ptr ds:[0],1</p>
-</li>
-<li><p>其他方法，比如push 指令只进行字操作。</p>
-</li>
-</ul>
-<p><font color=red>一般来说，可以用[bx+idata+si]访问结构体中的数据，用bx定位整个结构体，idata定位某一个数据项，si定位数组项的每个元素</font>C语言中的student.name[i]=汇编中的bx.10h[si]。</p>
-<h4 id="div指令和mul指令"><a href="#div指令和mul指令" class="headerlink" title="div指令和mul指令"></a>div指令和mul指令</h4><ul>
-<li>dive指令</li>
-</ul>
-<p>除数有8位和16位，在一个reg或者内存单元中；被除数默认在ax或者ax和dx中；</p>
-<p>如果除数为8位，则被除数为16位，默认在ax中存放，al存储商，ah存储余数；如果除数为16位，则被除数为32位，在ax和dx中，dx放高16位，ax存储商，dx存储余数。</p>
-<p>比如100001/100</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mov dx,1</span><br><span class="line">mov ax,86A1H  ;100001的十六进制表示为186A1H,高16位放在dx中</span><br><span class="line">mov bx,100</span><br><span class="line">div bx</span><br></pre></td></tr></table></figure>
-
-<ul>
-<li><p>mul指令</p>
-<p>两个相乘的数如果都是8位，一个默认在AL中，另一个在8位reg或内存单元中，结果默认在AX中；如果都是16位，一个默认在AX中，另一个在16位reg或内存单元中，结果高位在DX中，低位在AX中。</p>
-<p>比如100*10000</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mov ax,100</span><br><span class="line">mov bx,10000</span><br><span class="line">mul bx</span><br><span class="line">;结果ax=4240H，dx=000FH，1000000=F4240H</span><br></pre></td></tr></table></figure></li>
-</ul>
-<h4 id="dd指令和dup指令"><a href="#dd指令和dup指令" class="headerlink" title="dd指令和dup指令"></a>dd指令和dup指令</h4><p>db定义字节型数据</p>
-<p>dw定义字型数据</p>
-<p>dd定义双字型数据</p>
-<p>db 3 dup (0)表示定义了3个字节，值都是0，格式是db 重复的次数 dup （重复的数据）</p>
-<p>对于db 字符数据，相当于定义每一个字母的占位为8位，比如 ‘hello’，就代表‘h’ ，’e’…</p>
-<h4 id="adc指令和sbb指令"><a href="#adc指令和sbb指令" class="headerlink" title="adc指令和sbb指令"></a>adc指令和sbb指令</h4><p>adc是带进位加法指令 ====&gt; adc 操作对象1 ，操作对象2 ==&gt;对象1=对象1+对象2+CF</p>
-<p>sbb是带借位减法指令====&gt; sbb 操作对象1 ，操作对象2 ==&gt;对象1=对象1-对象2-CF</p>
-<h4 id="操作符offset"><a href="#操作符offset" class="headerlink" title="操作符offset"></a>操作符offset</h4><p>offset 标号   ：取得标号的偏移地址</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">assume cs:codesg</span><br><span class="line">codesg segment</span><br><span class="line">		start : mov ax,offset start   ;相当于mov ax,0</span><br><span class="line">		s     : mov ax,offset s				;相当于mov ax,3</span><br><span class="line">codesg ends</span><br><span class="line">end start</span><br></pre></td></tr></table></figure>
-
-<h4 id="jmp指令"><a href="#jmp指令" class="headerlink" title="jmp指令"></a>jmp指令</h4><ul>
-<li><p><code>jmp short 标号（转到标号处执行命令）</code></p>
-<p>段内短转移，对IP的修改范围是-128 到127</p>
-<p><font color=red>CPU在执行jmp指令的时候并不需要转移的目的地址，而包含的是转移的位移</font>，这个位移是编译器根据标号计算出来的。最终实现的功能是IP=IP+8位位移（补码表示）。</p>
-</li>
-<li><p><code>jmp near ptr 标号</code></p>
-<p>段内近转移，对IP的修改范围是-32768 - 32767，IP=IP+16位位移（补码表示）。</p>
-</li>
-<li><p><code>jmp far ptr 标号</code></p>
-<p>段间转移（远转移）</p>
-<p>cs=标号所在段的段地址；IP=标号在段中的偏移地址。</p>
-</li>
-<li><p><code>jmp word ptr 内存单元地址（段内转移）</code></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mov ax,0123H</span><br><span class="line">mov ds:[0],ax</span><br><span class="line">jmp word ptr ds:[0]			;执行后IP=0123H</span><br></pre></td></tr></table></figure></li>
-<li><p><code>jmp dword ptr 内存单元地址（段间转移）</code></p>
-<p>从内存单元地址处开始存放着两个字，高地址处的字是转移的目的段地址（CS），低地址处是转移的目的偏移地址（IP)</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">mov ax,0123H</span><br><span class="line">mov ds:[0],ax</span><br><span class="line">mov word ptr ds:[2],0</span><br><span class="line">jmp dword ptr ds:[0]			;执行后，CS=0，IP=0123H</span><br></pre></td></tr></table></figure></li>
-<li><p><code>jcxz 标号</code>（有条件转移指令）</p>
-<p>如果cx=0，转到标号处执行。</p>
-</li>
-</ul>
-<p><font color=red>所有有条件转移指令和循环指令都是短转移，对IP的修改为8位</font></p>
-<h4 id="call-和ret指令"><a href="#call-和ret指令" class="headerlink" title="call 和ret指令"></a>call 和ret指令</h4><p><font color=gree n>ret指令修改IP的内容，进转移；retf指令修改CS和IP的内容实现远转移。</font></p>
-<p>执行ret指令相当于进行 pop IP；retf指令相当于进行 pop IP；pop CS；</p>
-<p><font color=gree n>call指令时，将当前IP和CS压入栈中，并转移至标号处。</font></p>
-<p>执行call指令相当于进行 push IP；jmp near ptr 标号;</p>
-<p>call far ptr 标号  相当于进行   push CS; push IP; jmp far ptr 标号</p>
-<h4 id="cmp指令"><a href="#cmp指令" class="headerlink" title="cmp指令"></a>cmp指令</h4><p>格式：cmp 操作对象1，操作对象2</p>
-<p>功能：计算对象1-对象2，不保存结果，仅仅对标志寄存器进行设置</p>
-<p>cmp ax,bx</p>
-<ol>
-<li>ax=bx,ax-bx=0,   zf=1</li>
-<li>ax!=bx,zf=0</li>
-<li>ax&lt;bx,产生借位，cf=1</li>
-<li>ax&gt;=bx,cf=0</li>
-<li>ax&lt;=bx,cf=1,zf=1</li>
-<li>ax&gt;bx,cf=0,zf=0</li>
-</ol>
-<p>![截屏2021-09-09 上午10.02.34](汇编小结/截屏2021-09-09 上午10.02.34.png)</p>
-<p><strong>根据比较结果使用转移指令，相当于if   else语句</strong></p>
-<p><strong>![截屏2021-09-09 上午10.12.13](汇编小结/截屏2021-09-09 上午10.12.13.png)</strong></p>
-<h4 id="串传送指令"><a href="#串传送指令" class="headerlink" title="串传送指令"></a>串传送指令</h4><p><font color=blue>movsb</font> 功能是将ds：si指向的内存单元中的字节送入es：di中，然后根据df的值，将di和si递增或者递减。</p>
-<p><font color=blue>movsw</font>  功能是将ds：si指向的内存单元中的字送入es：di中，然后根据df的值，将di和si递增2或者递减2。</p>
-<p>一般来说，这两个指令都配合rep使用</p>
-<p><code>rep movesb</code>相当于<code>s:movesb      loop s</code>，根据cx的值重复执行后面的传送指令。</p>
-<p><font color=red>对方向标志位df进行设置</font>     cld指令：将df置0；    std指令：将df置1</p>
-<h4 id="pushf和popf指令"><a href="#pushf和popf指令" class="headerlink" title="pushf和popf指令"></a>pushf和popf指令</h4><p>pushf功能是将标志寄存器的值压入栈中，而popf是从栈中弹出数据送入标志寄存器中。</p>
-<h3 id="中断"><a href="#中断" class="headerlink" title="中断"></a>中断</h3><h4 id="内中断"><a href="#内中断" class="headerlink" title="内中断"></a>内中断</h4><p>cpu执行下面情况的时候会发生中断</p>
-<ol>
-<li>除法错误，中断类型码为0</li>
-<li>单步执行，中断类型码为1</li>
-<li>执行into指令，中断类型码为4</li>
-<li>执行int指令，指令格式为int n，n为中断类型码</li>
-</ol>
-<p>中断过程</p>
-<ol>
-<li>取得中断类型码</li>
-<li>标志寄存器值入栈</li>
-<li>设置flag的第八位TF和第九位IF的值为0。TF=1引发单步中断，IF=0，禁止其他的可屏蔽中断。</li>
-<li>CS的内容入栈</li>
-<li>IP的内容入栈</li>
-<li>从内存地址为中断类型码*4和中断类型码*4+2的两个字单元中读取中断处理程序的入口地址设置IP和CS。IP=N*4,CS=N*4+2</li>
-</ol>
-<p>中断处理程序的编写方法</p>
-<ol>
-<li>保存用到的寄存器</li>
-<li>处理中断</li>
-<li>恢复用到的寄存器</li>
-<li>用iret指令返回，相当于执行，pop IP，pop CS， popf。</li>
-</ol>
-<p>中断向量表是pc系统中最重要的内存区，用来存放中断处理程序的入口地址，一般情况下，从0000：0200至0000：02ff的256个字节空间所对应的中断向量表是空的</p>
-<p><font color=red>CPU执行指令 mov ss，ax之后，不响应任何中断，包括单步中断。</font></p>
-<h4 id="int-指令"><a href="#int-指令" class="headerlink" title="int 指令"></a><font color=blue><strong>int 指令</strong></font></h4><p>CPU执行int n指令，相当于引发一个n号中断的处理程序，过程如下</p>
-<ol>
-<li>取中断类型码</li>
-<li>标志寄存器入栈，IF=0，TF=0</li>
-<li>CS，IP入栈</li>
-<li>IP=n*4，CS=n*4+2</li>
-</ol>
-<p><font color=red>BIOS的 int 10h中断例程</font></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mov ah,2   ;置光标</span><br><span class="line">mov bh,0		;第0页</span><br><span class="line">mov dh,5	;dh中放行号</span><br><span class="line">mov dl,12	;dl中放列号</span><br><span class="line">int 10h		;调用例程</span><br></pre></td></tr></table></figure>
-
-<p>ah=2表示引用中断例程的2号子程序，功能为设置光标位置</p>
-<p>ah=9表示调用9号子程序，功能为在光标位置显示字符</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mov ah,9</span><br><span class="line">mov bl,&#x27;a&#x27;</span><br><span class="line">mov bl,7	;颜色属性</span><br><span class="line">mov bh,0	;即当前显示的页面</span><br><span class="line">mov cx,3	;重复次数</span><br><span class="line">int 10h		;调用例程</span><br></pre></td></tr></table></figure>
-
-<h4 id=""><a href="#" class="headerlink" title=""></a></h4><h4 id="端口"><a href="#端口" class="headerlink" title="端口"></a>端口</h4><p><font color=red>端口的读写指令只有in和out</font></p>
-<p>16位的CPU，最多可以定位2^16=64KB个不同的端口，范围为0-65535</p>
-<p>​    <strong>ps</strong>: 在in和out指令中，只能使用ax或者al来存放从端口中读入的数据或者要发送的数据，访问8位端口使用al，16位使用ax。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">in al,20h		;从20h，读入一个字节</span><br><span class="line">out 20h,al 		;往20h写入一个字节</span><br><span class="line"></span><br><span class="line">shl指令：逻辑左移，最后移出的一位写入CF中，最低位用0补充</span><br><span class="line">shr指令：逻辑右移，最后移出的一位写入CF中，最高位用0补充</span><br><span class="line"></span><br><span class="line">当移动位数大于1时，移动位数必须放在cl中。</span><br></pre></td></tr></table></figure>
-
-
-
-<h4 id="外中断"><a href="#外中断" class="headerlink" title="外中断"></a>外中断</h4><p><font color=red>可屏蔽中断</font>（CPU可以不响应的外中断）</p>
-<p>CPU响应与否外中断取决于标志寄存器IF的设置，当检测到CPU的中断信息时，如果IF=1，则执行完当前中断之后响应中断；如果IF=0，不响应。</p>
-<p><font color=red>不可屏蔽中断</font></p>
-<p>对于8086，不可屏蔽中断的中断类型码固定为2，所以中断过程不需要取中断类型码。</p>
-<h5 id="键盘的处理过程"><a href="#键盘的处理过程" class="headerlink" title="键盘的处理过程"></a>键盘的处理过程</h5><ol>
-<li><p>键盘输入</p>
-<p>松开键盘上的一个按键时，将产生一个扫描码，扫描码被送入主板上的相关接口芯片的寄存器中，该寄存器的端口地址为60h。</p>
-</li>
-<li><p>引发9号中断</p>
-<p>扫描码传到端口之后，向CPU发出中断类型码为9的可屏蔽中断。</p>
-</li>
-<li><p>执行int 9例程</p>
-<p>![截屏2021-09-12 下午6.03.07](汇编小结/截屏2021-09-12 下午6.03.07.png)</p>
-</li>
-</ol>
-<h3 id="直接地址表"><a href="#直接地址表" class="headerlink" title="直接地址表"></a>直接地址表</h3><p>![截屏2021-09-12 下午6.02.55](汇编小结/截屏2021-09-12 下午6.02.55.png)</p>
-<p>![截屏2021-09-12 下午6.13.40](汇编小结/截屏2021-09-12 下午6.13.40.png)</p>
-<p>![截屏2021-09-12 下午6.14.00](汇编小结/截屏2021-09-12 下午6.14.00.png)</p>
-<p>![截屏2021-09-12 下午6.14.09](汇编小结/截屏2021-09-12 下午6.14.09.png)</p>
-<p>![截屏2021-09-12 下午6.15.54](/Users/medima/blog/source/_posts/汇编小结/截屏2021-09-12 下午6.15.54.png)</p>
-<p><font color=red>seg操作符功能为取得某一标号的段地址</font></p>
-<h3 id="键盘输入和磁盘读写"><a href="#键盘输入和磁盘读写" class="headerlink" title="键盘输入和磁盘读写"></a>键盘输入和磁盘读写</h3><p><font color=red>int 9 中断例程的处理</font></p>
-<p>一般的键盘输入，中断例程结束之后，都放到了键盘缓冲区，键盘缓冲区有16个字单元，可以存储15个按键的扫描码和对应的ASCII码</p>
-<p><font color=red>int 16 中断例程的处理</font></p>
-<p>读取键盘缓冲区 <code>mov ah,0     int 16h</code>，这两条指令的功能主要是读取一个键盘输入，并且将其从缓冲区删除，将读取的扫描码送入ah，ASCII码送入al</p>
-<p><font color=red>int 13h中断例程</font></p>
-<p>访问磁盘的中断例程</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">mov ax,0</span><br><span class="line">mov es,ax</span><br><span class="line">mov bx,200h		;读取内容到es：bx的指向内存区</span><br><span class="line"></span><br><span class="line">mov al,1	;读取的扇区数</span><br><span class="line">mov ch,0	;磁道号</span><br><span class="line">mov cl,1	;扇区号</span><br><span class="line">mov dl,0	;驱动器号			   软驱从0开始，   0：软驱A     1：软驱B</span><br><span class="line">													硬盘从80h开始  80h：硬盘C    81h：硬盘D</span><br><span class="line">mov dh,0	;磁头号（面）</span><br><span class="line">mov ah,2	;2表示读扇区，3表示写扇区</span><br><span class="line">int 13h</span><br><span class="line"></span><br><span class="line">：返回参数</span><br><span class="line">	成功----&gt;  ah=0,al=读入或者写入的扇区数</span><br><span class="line">	失败----&gt;  ah=出错代码</span><br></pre></td></tr></table></figure>
-
-
+          <p>​       </p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/09/07/%E6%B1%87%E7%BC%96%E5%B0%8F%E7%BB%93/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
     
@@ -603,7 +384,7 @@
                   <i class="far fa-calendar-check"></i>
                 </span>
                 <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2021-09-12 22:16:50" itemprop="dateModified" datetime="2021-09-12T22:16:50+08:00">2021-09-12</time>
+                <time title="修改时间：2021-09-12 22:28:18" itemprop="dateModified" datetime="2021-09-12T22:28:18+08:00">2021-09-12</time>
               </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
@@ -626,122 +407,15 @@
     <div class="post-body" itemprop="articleBody">
     
       
-          <span id="more"></span>
-
-<h1 id="用户级线程"><a href="#用户级线程" class="headerlink" title="用户级线程"></a><center>用户级线程</center></h1><p><strong>用户线程</strong>指不需要内核支持而在用户程序中实现的线程，其不依赖于操作系统核心，应用进程利用线程库提供创建、同步、调度和管理线程的函数来控制用户线程。不需要用户态/核心态切换，速度快，操作系统内核不知道多线程的存在，因此一个线程阻塞将使得整个进程（包括它的所有线程）阻塞。由于这里的处理器时间片分配是以进程为基本单位，所以每个线程执行的时间相对减少。</p>
-<p><font color=red>优点</font></p>
-<ul>
-<li>线程调度非常快。一方面保存该线程状态的过程和调度程序都只是本地过程，启动他们比内核调用更快，另一方面，不需要陷入内核，不需要上下文切换。</li>
-<li>允许每个线程有自己定制的调度算法。</li>
-</ul>
-<p><font color=red>缺点</font></p>
-<ul>
-<li>如何实现阻塞系统调用。一个线程阻塞会停止所有线程。这里实现的方案是使用select系统调用，可以通知预期的read是否会阻塞。这类从事检查的代码称为<strong>包装器</strong></li>
-<li>一个线程开始运行，那么该进程中的其他线程就不能运行，除非第一个线程自动放弃cpu。<u>在一个单独的进程内部，没有时钟中断，所以不可能用轮转调度的方式调度线程,除非某个线程能够按照自己的意志进入运行时系统，否则调度程序就没有任何机会</u>。</li>
-</ul>
-<h1 id="内核级线程"><a href="#内核级线程" class="headerlink" title="内核级线程"></a><center>内核级线程</center></h1><p><strong>内核线程</strong>：由操作系统内核创建和撤销。内核维护进程及线程的上下文信息以及线程切换。一个内核线程由于I/O操作而阻塞，不会影响其它线程的运行。Windows NT和2000/XP支持内核线程。</p>
-<p><strong>内核中有用来记录系统中所有线程的线程表</strong></p>
-<p><strong>用户级线程中，运行时系统始终运行自己进程中的线程，直到内核剥夺cpu；内核级线程中，但一个线程阻塞时，，内核根据其选择可以运行同一个进程中的另一个线程或者另一个进程中的线程。</strong></p>
-<p><font color=red>优点</font></p>
-<ul>
-<li>当有多个处理机时，一个进程的多个线程可以同时执行。</li>
-</ul>
-<p><font color=red>缺点</font></p>
-<ul>
-<li>由内核进行调度，效率不高。</li>
-</ul>
-<p><strong><font color=green>当线程完全在用户空间实现时，内核根本不知道有线程存在。</font></strong></p>
-<p><mark>一般采用混合实现。</mark> 内核只识别内核级线程，并对其进行调度，其中一些内核级线程会被多个用户级线程多路复用。如同在没有多线程能力操作系统中某个进程的用户级线程一样，可以创建撤销操作这些用户级线程。在这种模型中，<strong>每个内核级线程有一个可以轮流使用的用户级线程集合</strong>。</p>
-<hr>
-<p><big><font color=blue>调度程序激活机制</font></big></p>
-<p>目标是模拟内核线程的功能。</p>
-<p>当使用该机制时，内核给每个进程安排一定数量的虚拟处理器，并且让用户空间的运行时系统将线程分配到处理器上。</p>
-<p><i>基本思路</i> ：当内核了解到一个线程阻塞后，内核通知该进程的运行时系统，并且在堆栈中以参数传递的形式对事件描述。内核通过一个已知的起始地址启动运行时系统，对Unix信号的一种模拟，称为<strong>上行调用</strong>。</p>
-<p><big><font color=blue>弹出式线程</font></big></p>
-<p>一个消息的到达导致系统创建一个处理该消息的线程。在内核空间中运行弹出式线程比在用户空间中快捷，而且内核空间中的弹出式线程可以很容易访问所有的表格和I/O设备。</p>
-<h1 id="进程间通信"><a href="#进程间通信" class="headerlink" title="进程间通信"></a><center>进程间通信</center></h1><p><strong>竞争条件</strong>：两个或多个进程读写某些共享数据时，而最后的结果取决于进程运行的精确时序。</p>
-<p><strong>临界区：</strong> 共享内存进行访问的程序片段。使得两个进程不可能同时处于临界区就能够避免竞争条件。对于一个好的方案要满足4个条件。</p>
-<blockquote>
-<ol>
-<li>任何两个进程不可能同时处于临界区。</li>
-<li>不应对cpu的速度和数量做任何假设。</li>
-<li>临界区外运行的程序不得阻塞其他进程。</li>
-<li>不得使进程无限期等待进入临界区。</li>
-</ol>
-</blockquote>
-<p><big><font color=blue>忙等待的互斥及方案</font></big></p>
-<p><font color=red>1. 屏蔽中断</font></p>
-<p>使得每个进程刚刚进入临界区之后就屏蔽所有中断，并在就要离开之前打开中断。屏蔽中断后，时钟中断也被屏蔽。<strong>cpu只有发生时钟中断或其他中断时才会发生进程切换</strong>。<u>屏蔽中断对于操作系统而言是很用的技术，但对于用户进程则不是一种合适的通用互斥机制</u>。屏蔽一个cpu的中断不会阻止其他cpu干预第一个cpu所做的操作。</p>
-<p><font color=red>2.锁变量</font> </p>
-<p>如果锁的值为0，则该进程进入临界区并将其设置为1，若锁的值为1，就等待直到值变为0。还是会存在竞争条件——一个进程读出锁的值为0，而恰好在它将其设置为1之前另一个进程被调度运行，将该锁变量置位1，两个进程同时进入临界区。</p>
-<p><font color=red>3.严格轮换法</font> </p>
-<p>连续测试一个变量直到某个值出现为止称为<strong>忙等待</strong>，用于忙等待的锁称为<strong>自旋锁</strong>。一个整形变量turn记录轮到哪个进程进入临界区。在一个进程比另一个进程慢很多的情况下，轮流进入临界区不是好办法。违反了条件3。</p>
-<p><font color=red>4.Peterson解法</font> </p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">#define N 2 //进程数为2</span><br><span class="line">int turn;  //现在轮到哪个进程？</span><br><span class="line">int interested[N]; //初始化置为false，即没有在临界区等待读写共享数据的</span><br><span class="line"> </span><br><span class="line">void enter_region(int process) //进入临界区</span><br><span class="line">&#123;</span><br><span class="line">     turn = process;</span><br><span class="line">     int other = 1 - turn; //另一个进程</span><br><span class="line">     interested[turn] = true;</span><br><span class="line">     while(turn == process &amp;&amp; interested[other] == true)</span><br><span class="line">                ; //一直循环，直到other进程退出临界区</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">void leave_region(int process)</span><br><span class="line">&#123;</span><br><span class="line">     interested[process] = false;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>会有忙等待的缺点。</p>
-<p><font color=red>5.TSL指令</font> </p>
-<p><code>TSL RX,LOCK</code>：称为测试并加锁。将一个内存字lock读到寄存器RX中，然后在该内存地址上存一个非零值。读字和写字操作保证是不可分割的。此处说明，<strong>锁住存储线不同于屏蔽中断</strong>，处理器1屏蔽中断对于处理器2没有任何影响。</p>
-<p>当lock为0时，任何进程都可以使用TSL指令将其设置为1，并且读写共享内存，操作结束使用一条move指令将lock的值重新设置为0.</p>
-<p>enter_region进入临界区调用，出临界区调用leave_region。</p>
-<p>会有忙等待的缺点。</p>
-<p><big><font color=blue>睡眠与唤醒</font></big></p>
-<p>优先级反转问题：高优先级的进程一直忙等待，而低优先级的进程占领临界区。</p>
-<p><font color=red>生产者-消费者问题</font></p>
-<p>解决方法——加一个唤醒等待位（对于两个进程而言)，因此引出信号量。</p>
-<p><mark>信号量</mark></p>
-<p>若一个信号量大于0，则执行一个down操作（即sleep），若该值为0，则进程将睡眠，而且此时down操作并未结束。检查数值，修改变量值以及可能发生的睡眠操作均作为一个单一的、不可分割的<strong>原子操作</strong>。</p>
-<p>如果一个或多个进程在该信号量上睡眠，无法完成先前的一个down操作，则由系统选择其中的一个并允许该进程完成他的down操作。</p>
-<p><font color=green>用信号量解决生产者-消费者问题</font></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">Semaphore mutex = <span class="number">1</span>; </span><br><span class="line">Semaphore full = <span class="number">0</span>; </span><br><span class="line"><span class="keyword">int</span> in = <span class="number">0</span>，out = <span class="number">0</span>;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">producer</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">while</span>(TRUE)</span><br><span class="line">	&#123;</span><br><span class="line">		item = produce_item();</span><br><span class="line">		P(mutex);				<span class="comment">//进入临界区</span></span><br><span class="line">		Buffer(in) = item;			<span class="comment">//新生产的数据项放入缓冲区</span></span><br><span class="line">		in = in + <span class="number">1</span>;				<span class="comment">//因无界，无需考虑输入指针越界</span></span><br><span class="line">		V(mutex);				<span class="comment">//离开临界区</span></span><br><span class="line">		V(full);				<span class="comment">//增加已用缓冲区的数目</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">consumer</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">	<span class="keyword">int</span> item;</span><br><span class="line">	<span class="keyword">while</span>(TRUE)</span><br><span class="line">	&#123;</span><br><span class="line">		P(full);			<span class="comment">//等待已用缓冲区的数目非0</span></span><br><span class="line">		P(mutex);			<span class="comment">//进入临界区</span></span><br><span class="line">		item = Buffer(out);		<span class="comment">//新生产的数据项放入缓冲区</span></span><br><span class="line">		out = out + <span class="number">1</span>;			<span class="comment">//因无界，无需考虑输出指针越界</span></span><br><span class="line">		V(mutex);			<span class="comment">//离开临界区</span></span><br><span class="line">		consume_item(item);		<span class="comment">//处理取出的数据项</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>该解决方案使用了三个信号量：一个称为full，用来记录充满缓冲槽数目，一个称为empty，记录空的缓冲槽总数；一个称为mutex，用来确保生产者和消费者不会同时访问缓冲区。full的初值为0，empty的初值为缓冲区中槽的数目，mutex的初值为1。供两个或多个进程使用的信号量，其初值为1，保证同时只有一个进程可以进入临界区，称作<b>二元信号量</b>。如果每个进程在进入临界区前都执行down操作，并在刚刚退出时执行一个up操作，就能够实现互斥。</p>
-<p><mark>互斥量</mark></p>
-<p>信号量的简化版，没有计数能力。是一个处于解锁和加锁状态的变量，0表示解锁，其他值则表示加锁。用户级线程包mutex_lock的代码实现和enter_region的代码实现的根本区别是<font color=orange>前者取锁失败，会调用thread_yied放弃cpu给另一个线程，这样就没有忙等待。</font> </p>
-<p>用户级线程包中，多个线程访问同一个互斥量是没有问题的，因为所有的线程都在一个公共地址空间中操作。如果进程有不连续的地址空间呢，如何共享turn变量。这里有方案如下，第一种是有些数据结构（信号量）可以放在内核中，并且只能通过系统调用来访问；第二种是让进程与其他进程共享其部分地址空间。</p>
-<p><font color=purple>快速用户区互斥量futex</font>——Linux的一个特性</p>
-<p>一个futex包含两个部分，一个内核服务和一个用户库，内核服务提供一个等待队列，允许多个进程在一个锁上等待，没有竞争时，futex完全在用户区工作。</p>
-<p>对于一个锁处于释放状态，线程通过原子操作”减少并检验“来夺取锁，接下来这个线程检查结果，看锁是否被释放，如果处于被锁状态，那么一切顺利，我们的线程成功夺取该锁，然而如果该锁被另一个线程持有，那么该线程必须等待。这种情况下爱，futex库不自旋，而是使用一个系统调用把这个线程放在内核的等待队列上；当一个线程使用完该锁时，通过原子操作”增加并检验“来释放锁，并检查结果，看是否仍有进程阻塞在内核等待队列上，如果有，则通知内核可以对等待队列上的一个或多个进程解除阻塞；如果没有锁竞争，则内核不需要参与其中。</p>
-<p><font color=purple>pthread中的互斥量</font></p>
-<p>创建和撤销互斥量的函数调用分别是pthread_mutex_init和pthread_mutex_destroy,也可以通过pthread_mutex_lock给互斥量上锁。</p>
-<p>除了互斥量，Pthread还提供了另一种同步机制：<strong>条件变量</strong>，允许线程由于一些未达到条件而阻塞。条件变量上的主要操作是pthread_cond_wait和pthread_cond_signal，前者阻塞调用线程直到另一线程向他发信号（使用后一个调用）。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line">#include&lt;pthread.h&gt;</span><br><span class="line">#include&lt;stdio.h&gt;</span><br><span class="line">#include&lt;stdlib.h&gt;</span><br><span class="line"> </span><br><span class="line">#define MAX 1000</span><br><span class="line"> </span><br><span class="line">pthread_mutex_t the_mutex;//互斥量</span><br><span class="line"> </span><br><span class="line">pthread_cond_t condc,condp;//条件变量</span><br><span class="line"> </span><br><span class="line">int buffer=0;//缓冲内容</span><br><span class="line"> </span><br><span class="line">void *producer(void *ptr)</span><br><span class="line">&#123;   </span><br><span class="line">    for(int i=1;i&lt;=MAX;i++)</span><br><span class="line">    &#123;</span><br><span class="line">        pthread_mutex_lock(&amp;the_mutex);//互斥使用缓冲区</span><br><span class="line">        while(buffer!=0)</span><br><span class="line">        &#123;</span><br><span class="line">            pthread_cond_wait(&amp;condp,&amp;the_mutex);//阻塞以等待信号</span><br><span class="line">        &#125;</span><br><span class="line"> </span><br><span class="line">        buffer=i;</span><br><span class="line">        printf(&quot;producer %d\n&quot;,i);</span><br><span class="line">        pthread_cond_signal(&amp;condc);//向另一个进程发出信号唤醒</span><br><span class="line">        pthread_mutex_unlock(&amp;the_mutex);//释放缓冲区</span><br><span class="line">    &#125;</span><br><span class="line">    pthread_exit(0);</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line">void *consumer(void *ptr)</span><br><span class="line">&#123;</span><br><span class="line">    int i;</span><br><span class="line">    for(i=1;i&lt;=MAX;i++)</span><br><span class="line">    &#123;</span><br><span class="line">        pthread_mutex_lock(&amp;the_mutex);</span><br><span class="line">        while(buffer==0)</span><br><span class="line">            pthread_cond_wait(&amp;condc,&amp;the_mutex);</span><br><span class="line">        printf(&quot;consumer %d\n&quot;,buffer);</span><br><span class="line">        buffer=0;</span><br><span class="line">        pthread_cond_signal(&amp;condp);</span><br><span class="line">        pthread_mutex_unlock(&amp;the_mutex);</span><br><span class="line">    &#125;</span><br><span class="line">    pthread_exit(0);</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">    pthread_t pro,con;//线程号</span><br><span class="line">    pthread_mutex_init(&amp;the_mutex,0);//创建一个互斥变量</span><br><span class="line">    pthread_cond_init(&amp;condc,0);//创建一个条件变量</span><br><span class="line">    pthread_cond_init(&amp;condp,0);</span><br><span class="line">    pthread_create(&amp;con,0,consumer,NULL);//创建线程</span><br><span class="line">    pthread_create(&amp;pro,0,producer,NULL);</span><br><span class="line">    pthread_join(pro,0);//如果没有pthread_join；主线程会很快结束从而使整个进程结束，从而使创建的线程没有机会开始执行就结束了</span><br><span class="line">    pthread_join(con,0);//加入pthread_join后，主线程会一直等待直到等待的线程结束自己才结束，使创建的线程有机会执行</span><br><span class="line">    //pthread_join函数会让主线程阻塞，直到所有线程都已经退出</span><br><span class="line"> </span><br><span class="line">    pthread_cond_destroy(&amp;condc);//销毁条件变量</span><br><span class="line">    pthread_cond_destroy(&amp;condp);</span><br><span class="line">    pthread_mutex_destroy(&amp;the_mutex);//销毁互斥变量</span><br><span class="line"> </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p><font color=red>注意：</font> 条件变量（不像信号变量）不会存在内存中。如果将一个信号传递给一个没有线程在等待的条件变量，那么这个信号就会丢失。</p>
-<p><mark>管程</mark></p>
-<p>由过程、变量及数据结构等组成的一个集合，组成一个特殊的模块或软件包。<font color=red>管程有一个很重要的特性是任一时刻只能有一个活跃进程。</font>进入管程时的互斥有编译器负责，任一时刻，写管程的人无需关注编译器是如何实现互斥的，只需知道所有的临界区转换为管程过程即可，绝不会有两个进程同时执行临界区中的代码。</p>
-<p>管程是一个编程语言概念。如果一个分布式系统具有多个cpu，并且每一个cpu拥有自己的私有内存，它们通过一个局域网连接，那么这些原语将失效，结论是，信号量太低级了，管程在少数几种编程语言之外无法使用，并且这些原语均为提供机器间的信息交换方法。因此引出消息传递。</p>
-<p><mark>消息传递</mark></p>
-<p>进程间的通信方法使用两条原语send和receive，为了防止信息丢失，一旦接收信息，立马发回一条特殊的确认信息。<strong>信箱</strong>，用来对一定数量的消息进行缓冲的地方，当一个进程试图向一个满的信箱发消息时，它将被挂起。</p>
-<p><mark>屏障</mark></p>
-<p>——用于进程组，而不是用户双进程的生产者-消费者问题。当一个进程到达屏障时，就被屏障阻拦，直到所有进程都到达该屏障为止。</p>
-<p><font color=red>避免锁：读-复制-更新</font> ——某些情况下，允许写操作来更新数据结构，即便还有其他进程正在使用它，方法是确保每个读操作要么读取旧的版本，要么读取新的版本，决不能是新旧数据的奇怪组合。</p>
-<h1 id="调度"><a href="#调度" class="headerlink" title="调度"></a><center>调度</center></h1><p><strong>调度程序</strong>：完成选择工作的部分，该程序使用的算法就是<strong>调度算法。</strong></p>
-<p><i>进程行为</i>：几乎所有进程的计算和I/O请求都是交替突发的。具体分为<strong>计算密集型</strong>和<strong>I/O密集型</strong>。有必要说明的是，随着cpu的速度越来越快，导致cpu的改进比磁盘的改进快得多，因此更多的进程倾向于I/O密集型。</p>
-<p>对于什么时候调度主要分为<strong>非抢占式调度</strong>和<strong>抢占式调度</strong>。前者是挑选一个进程然后让其运行直至被阻塞（阻塞在I/O上或者等待另一个进程），或者直到该进程自动放弃cpu。这样做的结果是时钟中断发生时不会发生调度。在处理完时钟中断之后如果没有更高优先级的进程等待就继续完成被中断的进程。后者则是让该进程运行某个固定时段的最大值，如果这个时段结束，它仍在运行就挂起并选择另一个进程运行（如果存在另一个就绪的进程）。抢占式调度处理时，<u>需要在时间间隔的末端发生时钟中断，以便把cpu控制返回给调度程序。</u></p>
-<h4 id="调度算法分类"><a href="#调度算法分类" class="headerlink" title="调度算法分类"></a><font color=blue>调度算法分类</font></h4><p><i>所有调度算法的设计目标是公平——给每个进程公平的cpu份额；策略强制执行——保证规定的策略被执行；平衡——保证系统的所有部分都忙碌。</i></p>
-<p>对于<strong>批处理系统</strong>，非抢占式调度算法较为接受；通常检查三个指标。吞吐量——每小时最大作业数；周转时间——从提交到终止间的最小时间；cpu利用率——保持cpu始终忙碌（用来度量）。</p>
-<ul>
-<li>先来先服务。在这个算法中，一个单链表记录了所有就绪进程。</li>
-<li>最短作业优先。适用于队列中有若干个同等重要的作业被启动时。</li>
-<li>最短剩余时间优先。即最短作业优先的抢占式版本。调度程序总是选择剩余时间最短的那个进程运行。</li>
-</ul>
-<p>对于<strong>交互系统</strong>，抢占显得较为必须；通常检查两个指标。响应时间——发出命令到响应之间的时间；均衡性——满足用户的期望。</p>
-<ul>
-<li>轮转调度。时间片，调度程序维护一张可运行的进程列表。进程切换或者<strong>上下文切换</strong> 是需要一定时间进行管理事务处理的——保存和装入寄存器值及内存映像，更新各种表格和列表，清除和重新调入内存高速缓存等。时间片太短导致过多进程切换，降低cpu效率，而太长可能引起对于短的交互请求的响应时间变长。一般20-50ms</li>
-<li>优先级调度。为了防止高优先级进程无休止运行下去，调度程序可能在每个时钟滴答（即每个时钟中断）降低当前进程的优先级。优先级可以是静态赋予和动态，一种可以使得I/O密集型进程获得较好的算法是，将其优先级设为1/f，f为该进程在上一时间片中所占的部分。将一组进程按优先分为若干类，并且在各类之间采用优先级调度，各类进程的内部采用轮转调度。</li>
-<li>多级队列。例如对于一个进程需要连续计算100个时间片，最初1个，换出之后下次获得2个，接下来依次获得4、8、16、32、64。随着进程优先级的降低，它的运行频度逐渐放慢，从而为短的交互进程让出cpu。</li>
-<li>最短进程优先。根据进程过去的行为推测，并执行估计运行时间最短的那个。通过当前测量值和先前估计值进行加权平均而得到下一个估计值得叫<strong>老化</strong>。</li>
-<li>保证调度。向用户作出明确的性能保证，然后去实现它。为了实现，系统必须跟踪各个进程自创建以来已使用了多少cpu时间。</li>
-<li>彩票调度。所有进程是平等的，但是某些进程平等一些。有两个性质，彩票调度是反应迅速的和协作进程可以交换它们的彩票。</li>
-<li>公平分享调度。系统在调度处理之前考虑谁拥有进程这一因素，每个用户分配到cpu时间的一部分，而调度程序以一种强制的方式选择进程。</li>
-</ul>
-<p>对于<strong>实时系统</strong>，抢占有时是不需要的。满足截止时间——避免丢失数据；可预测性——多媒体系统中避免品质降低。系统通常分为硬实时和软实时，前者必须满足绝对的截止时间。系统中的事件按照响应方式可以分为周期性和非周期性。可调度的条件是进程共同需要的cpu时间总和小于cpu能够提供的时间。</p>
-<h4 id="策略和机制"><a href="#策略和机制" class="headerlink" title="策略和机制"></a><font color=blue>策略和机制</font></h4><p><strong>解决问题的方法是将调度机制与调度策略分离这个一贯的原则</strong>。调度机制位于内核，而调度策略则由用户进程决定，策略与机制分离。</p>
-<h4 id="线程调度"><a href="#线程调度" class="headerlink" title="线程调度"></a><font color=blue>线程调度</font></h4><p>首先考虑用户级线程，进程中的<strong>线程调度程序</strong>决定哪个进程运行，由于多线程并不存在<strong>时钟中断</strong>，所以这个线程可以按其意愿任意运行多长时间，如果该线程用完了进程的全部时间片，内核会选择另一个进程。</p>
-<p>考虑内核级线程，选择一个特定的线程运行，它不用考虑该线程属于哪个进程，一旦线程阻塞在I/O上就不需要像在用户级线程中那样将整个进程挂起。</p>
-<p>用户级线程可以定制线程调度程序，所以一般而言，应用定制的线程调度程序能够比内核更好地满足应用的需要。</p>
-
+          <p>​     </p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2021/07/21/%E8%BF%9B%E7%A8%8B%E5%92%8C%E7%BA%BF%E7%A8%8B/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
     
