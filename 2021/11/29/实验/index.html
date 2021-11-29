@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<script src="//cdn.bootcss.com/pace/1.0.2/pace.min.js"></script>
+<link href="//cdn.bootcss.com/pace/1.0.2/themes/pink/pace-theme-flash.css" rel="stylesheet">
+<style>
+    .pace .pace-progress {
+        background: #1E92FB; /*进度条颜色*/
+        height: 3px;
+    }
+    .pace .pace-progress-inner {
+         box-shadow: 0 0 10px #1E92FB, 0 0 5px     #1E92FB; /*阴影颜色*/
+    }
+    .pace .pace-activity {
+        border-top-color: #1E92FB;    /*上边框颜色*/
+        border-left-color: #1E92FB;    /*左边框颜色*/
+    }
+</style>
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.4.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Pisces","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="操作系统试验（哈工大）地址映射与共享一、实验内容1. 跟踪地址翻译过程​    首先以汇编级调试的方式启动 Bochs，引导 Linux 0.11，在 0.11 下编译和运行 test.c。它是一个无限循环的程序，永远不会主动退出。然后在调试器中通过查看各项系统参数，从逻辑地址、LDT 表、GDT 表、线性地址到页表，计算出变量 i 的物理地址。最后通过直接修改物理内存的方式让 test.c 退出">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Amerny">
+<meta property="og:url" content="http://example.com/2021/11/29/%E5%AE%9E%E9%AA%8C/index.html">
+<meta property="og:site_name" content="Amerny">
+<meta property="og:description" content="操作系统试验（哈工大）地址映射与共享一、实验内容1. 跟踪地址翻译过程​    首先以汇编级调试的方式启动 Bochs，引导 Linux 0.11，在 0.11 下编译和运行 test.c。它是一个无限循环的程序，永远不会主动退出。然后在调试器中通过查看各项系统参数，从逻辑地址、LDT 表、GDT 表、线性地址到页表，计算出变量 i 的物理地址。最后通过直接修改物理内存的方式让 test.c 退出">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="http://example.com/2021/11/29/%E5%AE%9E%E9%AA%8C/medima/Desktop/page.png">
+<meta property="og:image" content="http://example.com/2021/11/29/%E5%AE%9E%E9%AA%8C/medima/Desktop/transform.png">
+<meta property="article:published_time" content="2021-11-29T08:14:53.300Z">
+<meta property="article:modified_time" content="2021-11-29T08:15:17.893Z">
+<meta property="article:author" content="Amerny">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://example.com/2021/11/29/%E5%AE%9E%E9%AA%8C/medima/Desktop/page.png">
+
+<link rel="canonical" href="http://example.com/2021/11/29/%E5%AE%9E%E9%AA%8C/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title> | Amerny</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+<a target="_blank" rel="noopener" href="https://github.com/Amerny" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+```
+<script type="text/javascript" src="//cdn.bootcss.com/canvas-nest.js/1.0.0/canvas-nest.min.js"></script>
+```
+
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Amerny</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">learning</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+    
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+    
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2021/11/29/%E5%AE%9E%E9%AA%8C/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="Amerny">
+      <meta itemprop="description" content="recording">
+    </span>
+    
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Amerny">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          
+        </h1>
+    
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+    
+              <time title="创建时间：2021-11-29 16:14:53 / 修改时间：16:15:17" itemprop="dateCreated datePublished" datetime="2021-11-29T16:14:53+08:00">2021-11-29</time>
+            </span>
+    
+          
+    
+        </div>
+      </header>
+    
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+    
+      
+        <h1 id="操作系统试验（哈工大）"><a href="#操作系统试验（哈工大）" class="headerlink" title="操作系统试验（哈工大）"></a>操作系统试验（哈工大）</h1><h2 id="地址映射与共享"><a href="#地址映射与共享" class="headerlink" title="地址映射与共享"></a>地址映射与共享</h2><h3 id="一、实验内容"><a href="#一、实验内容" class="headerlink" title="一、实验内容"></a>一、实验内容</h3><h4 id="1-跟踪地址翻译过程"><a href="#1-跟踪地址翻译过程" class="headerlink" title="1. 跟踪地址翻译过程"></a>1. 跟踪地址翻译过程</h4><p>​    首先以汇编级调试的方式启动 Bochs，引导 Linux 0.11，在 0.11 下编译和运行 test.c。它是一个无限循环的程序，永远不会主动退出。然后在调试器中通过查看各项系统参数，从逻辑地址、LDT 表、GDT 表、线性地址到页表，计算出变量 <code>i</code> 的物理地址。最后通过直接修改物理内存的方式让 test.c 退出运行。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> i = <span class="number">0x12345678</span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;The logical/virtual address of i is 0x%08x&quot;</span>, &amp;i);</span><br><span class="line">    fflush(<span class="built_in">stdout</span>);</span><br><span class="line">    <span class="keyword">while</span> (i)</span><br><span class="line">        ;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h4 id="2-基于共享内存的生产者—消费者程序"><a href="#2-基于共享内存的生产者—消费者程序" class="headerlink" title="2. 基于共享内存的生产者—消费者程序"></a>2. 基于共享内存的生产者—消费者程序</h4><p>本项实验在 Ubuntu 下完成，与信号量实验中的 <code>pc.c</code> 的功能要求基本一致，仅有两点不同：</p>
+<ul>
+<li>不用文件做缓冲区，而是使用共享内存；</li>
+<li>生产者和消费者分别是不同的程序。生产者是 producer.c，消费者是 consumer.c。两个程序都是单进程的，通过信号量和缓冲区进行通信。</li>
+</ul>
+<p>Linux 下，可以通过 <code>shmget()</code> 和 <code>shmat()</code> 两个系统调用使用共享内存。</p>
+<h4 id="3-共享内存的实现"><a href="#3-共享内存的实现" class="headerlink" title="3. 共享内存的实现"></a>3. 共享内存的实现</h4><p>本部分实验内容是在 Linux 0.11 上实现上述页面共享，并将上一部分实现的 producer.c 和 consumer.c 移植过来，验证页面共享的有效性。</p>
+<p>具体要求在 <code>mm/shm.c</code> 中实现 <code>shmget()</code> 和 <code>shmat()</code> 两个系统调用。它们能支持 <code>producer.c</code> 和 <code>consumer.c</code> 的运行即可，不需要完整地实现 POSIX 所规定的功能。</p>
+<ul>
+<li><strong>shmget()</strong></li>
+</ul>
+ <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">shmget</span><span class="params">(<span class="keyword">key_t</span> key, <span class="keyword">size_t</span> size, <span class="keyword">int</span> shmflg)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p><code>shmget()</code> 会新建/打开一页内存，并返回该页共享内存的 shmid（该块共享内存在操作系统内部的 id）。</p>
+<p>所有使用同一块共享内存的进程都要使用相同的 key 参数。</p>
+<p>如果 key 所对应的共享内存已经建立，则直接返回 <code>shmid</code>。如果 size 超过一页内存的大小，返回 <code>-1</code>，并置 <code>errno</code> 为 <code>EINVAL</code>。如果系统无空闲内存，返回 -1，并置 <code>errno</code> 为 <code>ENOMEM</code>。</p>
+<p><code>shmflg</code>参数可以忽略</p>
+<ul>
+<li><strong>shmat()</strong></li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">void</span> *<span class="title">shmat</span><span class="params">(<span class="keyword">int</span> shmid, <span class="keyword">const</span> <span class="keyword">void</span> *shmaddr, <span class="keyword">int</span> shmflg)</span></span>;</span><br></pre></td></tr></table></figure>
+
+<p><code>shmat()</code> 会将 <code>shmid</code> 指定的共享页面映射到当前进程的虚拟地址空间中，并将其首地址返回。</p>
+<p>如果 <code>shmid</code> 非法，返回 <code>-1</code>，并置 <code>errno</code> 为 <code>EINVAL</code>。</p>
+<p><code>shmaddr</code> 和 <code>shmflg</code> 参数可忽略。</p>
+<h3 id="二、具体步骤"><a href="#二、具体步骤" class="headerlink" title="二、具体步骤"></a>二、具体步骤</h3><h4 id="1-跟踪地址映射"><a href="#1-跟踪地址映射" class="headerlink" title="1. 跟踪地址映射"></a>1. 跟踪地址映射</h4><h5 id="1）准备工作"><a href="#1）准备工作" class="headerlink" title="1）准备工作"></a>1）准备工作</h5><ul>
+<li><p>在Ubuntu终端中使用 进入汇编级调试模式</p>
+  <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> ~/oslab</span><br><span class="line"></span><br><span class="line">./dbg-asm	<span class="comment">#进入调试,Bochs黑屏显示，此时在终端继续输入 c ,即可运行linux0.11</span></span><br><span class="line">	</span><br></pre></td></tr></table></figure></li>
+<li><p>在Bochs中编译并运行<code>test.c</code></p>
+  <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> i = <span class="number">0x12345678</span>;</span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;The logical/virtual address of i is 0x%08x&quot;</span>, &amp;i);</span><br><span class="line">    fflush(<span class="built_in">stdout</span>);</span><br><span class="line">    <span class="keyword">while</span> (i)</span><br><span class="line">        ;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>通过使用 <code>c</code>和<code>ctrl+c</code>使得显示以下信息。</p>
+  <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="number">0</span>) [<span class="number">0x00fc8031</span>] <span class="number">000f</span>:<span class="number">00000031</span> (unk. ctxt): cmp dword ptr ds:<span class="number">0x3004</span>, <span class="number">0x00000000</span> ; <span class="number">833</span>d0430000000</span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>​        如果显示的下一条指令不是 <code>cmp ...</code>（这里指语句以 <code>cmp</code> 开头），就用 <code>n</code> 命令单步运行        几步，直到停在 <code>cmp ...</code>。</p>
+<p>​        使用命令 <code>u /8</code>，显示从当前位置开始 8 条指令的反汇编代码。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">3</span>&gt; u /<span class="number">8</span></span><br><span class="line"><span class="number">10000063</span>: (                    ): cmp dword ptr ds:<span class="number">0x3004</span>, <span class="number">0x00000000</span> ; <span class="number">833</span>d0430000000</span><br><span class="line"><span class="number">1000006</span>a: (                    ): jz .+<span class="number">0x00000004</span>           ; <span class="number">7404</span></span><br><span class="line"><span class="number">1000006</span>c: (                    ): jmp .+<span class="number">0xfffffff5</span>          ; ebf5</span><br><span class="line"><span class="number">1000006</span>e: (                    ): add byte ptr ds:[eax], al ; <span class="number">0000</span></span><br><span class="line"><span class="number">10000070</span>: (                    ): <span class="keyword">xor</span> eax, eax              ; <span class="number">31</span>c0</span><br><span class="line"><span class="number">10000072</span>: (                    ): jmp .+<span class="number">0x00000000</span>          ; eb00</span><br><span class="line"><span class="number">10000074</span>: (                    ): leave                     ; c9</span><br><span class="line"><span class="number">10000075</span>: (                    ): ret                       ; c3</span><br></pre></td></tr></table></figure>
+
+<p>这就是 test.c 中从 while 开始一直到 return 的汇编代码。变量 i 保存在 <code>ds:0x3004</code> 这个地址，并不停地和 0 进行比较，直到它为 0，才会跳出循环。</p>
+<h5 id="2）段表"><a href="#2）段表" class="headerlink" title="2）段表"></a>2）段表</h5><ul>
+<li><p>在终端输入<code>sreg</code></p>
+  <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">4</span>&gt; sreg</span><br><span class="line">cs:s=<span class="number">0x000f</span>, dl=<span class="number">0x00000002</span>, dh=<span class="number">0x10c0fa00</span>, valid=<span class="number">1</span></span><br><span class="line">ds:s=<span class="number">0x0017</span>, dl=<span class="number">0x00003fff</span>, dh=<span class="number">0x10c0f300</span>, valid=<span class="number">3</span></span><br><span class="line">ss:s=<span class="number">0x0017</span>, dl=<span class="number">0x00003fff</span>, dh=<span class="number">0x10c0f300</span>, valid=<span class="number">1</span></span><br><span class="line">es:s=<span class="number">0x0017</span>, dl=<span class="number">0x00003fff</span>, dh=<span class="number">0x10c0f300</span>, valid=<span class="number">1</span></span><br><span class="line">fs:s=<span class="number">0x0017</span>, dl=<span class="number">0x00003fff</span>, dh=<span class="number">0x10c0f300</span>, valid=<span class="number">1</span></span><br><span class="line">gs:s=<span class="number">0x0017</span>, dl=<span class="number">0x00003fff</span>, dh=<span class="number">0x10c0f300</span>, valid=<span class="number">1</span></span><br><span class="line">ldtr:s=<span class="number">0x0068</span>, dl=<span class="number">0xa2d00068</span>, dh=<span class="number">0x000082fa</span>, valid=<span class="number">1</span></span><br><span class="line">tr:s=<span class="number">0x0060</span>, dl=<span class="number">0xa2e80068</span>, dh=<span class="number">0x00008bfa</span>, valid=<span class="number">1</span></span><br><span class="line">gdtr:base=<span class="number">0x00005cb8</span>, limit=<span class="number">0x7ff</span></span><br><span class="line">idtr:base=<span class="number">0x000054b8</span>, limit=<span class="number">0x7ff</span></span><br></pre></td></tr></table></figure>
+
+<p>  可以看到 ldtr 的值是 <code>0x0068=0000000001101000</code>（二进制）<strong>段选择符</strong>，<strong>低三位为TI和RPL</strong>表示 LDT 表存放在 GDT 表的 1101（二进制）=13（十进制）号位置（每位数据的意义参考后文叙述的段选择子）。（<strong>从0开始编号</strong>）</p>
+<p>  而 GDT 的位置已经由 gdtr 明确给出，在物理地址的 <code>0x00005cb8</code>。<font color="#10aa"><strong>GDTR一共48位，低16位为表的界限，高32位为基地址</strong>。</font></p>
+</li>
+<li><p>用 <code>xp /32w 0x00005cb8</code> 查看从该地址开始，32 个字的内容，及 GDT 表的前 16 项，如下：（32位地址，一个字32位，即4个字节）。</p>
+  <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">7</span>&gt; xp /<span class="number">32</span>w <span class="number">0x00005cb8</span></span><br><span class="line">[bochs]:</span><br><span class="line"><span class="number">0x00005cb8</span> &lt;bogus+       <span class="number">0</span>&gt;:	<span class="number">0x00000000</span>	<span class="number">0x00000000</span>	<span class="number">0x00000fff</span>	<span class="number">0x00c09a00</span></span><br><span class="line"><span class="number">0x00005cc8</span> &lt;bogus+      <span class="number">16</span>&gt;:	<span class="number">0x00000fff</span>	<span class="number">0x00c09300</span>	<span class="number">0x00000000</span>	<span class="number">0x00000000</span></span><br><span class="line"><span class="number">0x00005cd8</span> &lt;bogus+      <span class="number">32</span>&gt;:	<span class="number">0xb8880068</span>	<span class="number">0x00008901</span>	<span class="number">0xb8700068</span>	<span class="number">0x00008201</span></span><br><span class="line"><span class="number">0x00005ce8</span> &lt;bogus+      <span class="number">48</span>&gt;:	<span class="number">0xf2e80068</span>	<span class="number">0x000089ff</span>	<span class="number">0xf2d00068</span>	<span class="number">0x000082ff</span></span><br><span class="line"><span class="number">0x00005cf8</span> &lt;bogus+      <span class="number">64</span>&gt;:	<span class="number">0xd2e80068</span>	<span class="number">0x000089ff</span>	<span class="number">0xd2d00068</span>	<span class="number">0x000082ff</span></span><br><span class="line"><span class="number">0x00005d08</span> &lt;bogus+      <span class="number">80</span>&gt;:	<span class="number">0x12e80068</span>	<span class="number">0x000089fc</span>	<span class="number">0x12d00068</span>	<span class="number">0x000082fc</span></span><br><span class="line"><span class="number">0x00005d18</span> &lt;bogus+      <span class="number">96</span>&gt;:	<span class="number">0x52e80068</span>	<span class="number">0x00008bfd</span>	<span class="number">0x52d00068</span>	<span class="number">0x000082fd</span></span><br><span class="line"><span class="number">0x00005d28</span> &lt;bogus+     <span class="number">112</span>&gt;:	<span class="number">0xe2e80068</span>	<span class="number">0x000089f8</span>	<span class="number">0xe2d00068</span>	<span class="number">0x000082f8</span></span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<p>  GDT 表中的每一项占 64 位（8 个字节），所以我们要查找的项的地址是 <code>0x00005cb8+13*8</code>。</p>
+<p>  输入 <code>xp /2w 0x00005cb8+13*8</code>，得到：</p>
+  <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">8</span>&gt; xp /<span class="number">2</span>w <span class="number">0x00005cb8</span>+<span class="number">13</span>*<span class="number">8</span></span><br><span class="line">[bochs]:</span><br><span class="line"><span class="number">0x00005d20</span> &lt;bogus+       <span class="number">0</span>&gt;:	<span class="number">0x52d00068</span>	<span class="number">0x000082fd</span></span><br></pre></td></tr></table></figure>
+
+<p>  “0x<strong>52d0</strong>0068 0x<strong>00</strong>0082<strong>fd</strong>” 将其中的加粗数字组合为“0x00fd52d0”，这就是 <strong>LDT 表的物理地址</strong>（低32位的 0x52d00068中的高16位➕高32位的0x000082fd的低8位和高8位）**<font color="green">段描述符为64位，其中包括32位基地址和20位段界限以及其他属性，其中若粒度位G=0，则段界限以字节为单位；若G=1，则段界限以4KB为单位，此时段的扩展范围为4KB~4GB</font>。**是段界限的单位。</p>
+<p>  <code>xp /8w 0x00fd52d0</code>，得到：</p>
+  <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">9</span>&gt; xp /<span class="number">8</span>w <span class="number">0x00fd52d0</span></span><br><span class="line">[bochs]:</span><br><span class="line"><span class="number">0x00fd52d0</span> &lt;bogus+       <span class="number">0</span>&gt;:	<span class="number">0x00000000</span>	<span class="number">0x00000000</span>	<span class="number">0x00000002</span>	<span class="number">0x10c0fa00</span></span><br><span class="line"><span class="number">0x00fd52e0</span> &lt;bogus+      <span class="number">16</span>&gt;:	<span class="number">0x00003fff</span>	<span class="number">0x10c0f300</span>	<span class="number">0x00000000</span>	<span class="number">0x00fd6000</span></span><br></pre></td></tr></table></figure>
+
+<p>  这就是 LDT 表的前 4 项内容了。</p>
+</li>
+<li><p>看看 ds 选择子的内容，还是用 <code>sreg</code> 命令：</p>
+<p>  ds 的值是 <code>0x0017=0000000000010111</code>（二进制），所以 RPL=11，可见是在最低的特权级（因为在应用程序中执行），TI=1，表示查找 LDT 表，索引值为 10（二进制）= 2（十进制），表示找 LDT 表中的第 3 个段描述符（从 0 开始编号）。</p>
+</li>
+<li><p>费了很大的劲，实际上我们需要的只有段基址一项数据，即段描述符 “0x<strong>0000</strong>3fff 0x<strong>10</strong>c0f3<strong>00</strong>” 中加粗部分组合成的 “0x10000000”。这就是 ds 段在线性地址空间中的起始地址。用同样的方法也可以算算其它段的基址，都是这个数。</p>
+<p>  LDT 和 GDT 的结构一样，每项占 8 个字节。所以第 3 项 <code>0x00003fff 0x10c0f300</code>（上一步骤的最后一个输出结果中） 就是搜寻好久的 ds 的段描述符了。</p>
+</li>
+<li><p>费了很大的劲，实际上我们需要的只有段基址一项数据，即段描述符 “0x00003fff 0x10c0f300” 中加粗部分组合成的 “0x10000000”。这就是 ds 段在线性地址空间中的起始地址。用同样的方法也可以算算其它段的基址，都是这个数。</p>
+<p>  段基址+段内偏移，就是线性地址了。所以 ds:0x3004 的线性地址就是： </p>
+  <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">0x10000000</span> + <span class="number">0x3004</span> = <span class="number">0x10003004</span></span><br></pre></td></tr></table></figure>
+
+<p>  用 <code>calc ds:0x3004</code> 命令可以验证这个结果。</p>
+</li>
+<li><p>线性地址到物理地址转换</p>
+<p>  首先需要算出线性地址中的页目录号、页表号和页内偏移，它们分别对应了 32 位线性地址的 10 位 + 10 位 + 12 位，所以 0x10003004 的页目录号是 64，页号 3，页内偏移是 4。</p>
+<p>  IA-32 下，页目录表的位置由 CR3 寄存器指引。“creg”命令可以看到：</p>
+  <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">11</span>&gt; creg</span><br><span class="line">CR0=<span class="number">0x8000001b</span>: PG cd nw ac wp ne ET TS em MP PE</span><br><span class="line">CR2=page fault laddr=<span class="number">0x10002fac</span></span><br><span class="line">CR3=<span class="number">0x00000000</span></span><br><span class="line">    PCD=page-level cache disable=<span class="number">0</span></span><br><span class="line">    PWT=page-level writes transparent=<span class="number">0</span></span><br><span class="line">CR4=<span class="number">0x00000000</span>: osxmmexcpt osfxsr pce pge mce pae pse de tsd pvi vme</span><br></pre></td></tr></table></figure>
+
+<p>  说明页目录表的基址为 0。<img src="/2021/11/29/%E5%AE%9E%E9%AA%8C/medima/Desktop/page.png" alt="page"></p>
+<p>  页目录表和页表中的内容很简单，是 1024 个 32 位（正好是 4K）数。这 32 位中前 20 位是物理页框号，后面是一些属性信息（其中最重要的是最后一位 P）。其中第 65 个页目录项就是我们要找的内容，用“<code>xp /w 0+64*4</code>”查看：</p>
+  <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">14</span>&gt; xp /w <span class="number">0</span>+<span class="number">64</span>*<span class="number">4</span></span><br><span class="line">[bochs]:</span><br><span class="line"><span class="number">0x00000100</span> &lt;bogus+       <span class="number">0</span>&gt;:	<span class="number">0x00fa5027</span></span><br></pre></td></tr></table></figure>
+
+<p>  其中的 027 是属性，显然 P=1。</p>
+<p>  页表所在物理页框号为 <code>0x00fa5</code>，即页表在物理内存的 <code>0x00fa5000</code> 位置。从该位置开始查找 3 号页表项，得到（<code>xp /w 0x00fa5000+3*4</code>）：</p>
+  <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">15</span>&gt; xp /w <span class="number">0x00fa5000</span>+<span class="number">3</span>*<span class="number">4</span></span><br><span class="line">[bochs]:</span><br><span class="line"><span class="number">0x00fa500c</span> &lt;bogus+       <span class="number">0</span>&gt;:	<span class="number">0x00fa2067</span></span><br></pre></td></tr></table></figure>
+
+<p>  <img src="/2021/11/29/%E5%AE%9E%E9%AA%8C/medima/Desktop/transform.png" alt="transform"></p>
+</li>
+<li><p>物理地址</p>
+<p>  线性地址 <code>0x10003004</code> 对应的物理页框号为 0x00fa2，和页内偏移 0x004 接到一起，得到 <code>0x00fa2004</code>，这就是变量 i 的物理地址。可以通过两种方法验证。</p>
+<p>  第一种方法是用命令 <code>page 0x10003004</code>，可以得到信息：</p>
+  <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">16</span>&gt; page <span class="number">0x10003004</span></span><br><span class="line">linear page <span class="number">0x10003000</span> maps to physical page <span class="number">0x00fa2000</span></span><br></pre></td></tr></table></figure>
+
+<p>  第二种方法是用命令 <code>xp /w 0x00fa7004</code>，可以看到：</p>
+  <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;bochs:<span class="number">20</span>&gt; xp /w <span class="number">0x00fa2004</span></span><br><span class="line">[bochs]:</span><br><span class="line"><span class="number">0x00fa2004</span> &lt;bogus+       <span class="number">0</span>&gt;:	<span class="number">0x12345678</span></span><br></pre></td></tr></table></figure>
+
+<p>  现在，通过直接修改内存来改变 i 的值为 0，命令是： <code>setpmem 0x00fa7004 4 0</code>，表示从 0x00fa7004 地址开始的 4 个字节都设为 0。然后再用“c”命令继续 Bochs 的运行，可以看到 test 退出了，说明 i 的修改成功了，此项实验结束。</p>
+<p>  这项实验主要是加深对地址转换的理解以及一些细节掌握，建议这块理解不清楚的可以跟着做一下</p>
+</li>
+</ul>
+<h4 id="2-基于共享内存的生产者—消费者程序-1"><a href="#2-基于共享内存的生产者—消费者程序-1" class="headerlink" title="2. 基于共享内存的生产者—消费者程序"></a>2. 基于共享内存的生产者—消费者程序</h4>
+    </div>
+    
+    
+    
+    
+    <div>
+      
+        ```xml
+<div>
+    
+        <div style="text-align:center;color: #ccc;font-size:14px;">-------------本文结束<i class="fa fa-paw"></i>感谢您的阅读-------------</div>
+    
+</div>
+```
+
+      
+    </div>
+    
+      <footer class="post-footer">
+    
+        
+
+    
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/09/15/GRUB%E5%BC%95%E5%AF%BC%E6%B5%81%E7%A8%8B/" rel="prev" title="GRUB引导流程">
+      <i class="fa fa-chevron-left"></i> GRUB引导流程
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E8%AF%95%E9%AA%8C%EF%BC%88%E5%93%88%E5%B7%A5%E5%A4%A7%EF%BC%89"><span class="nav-number">1.</span> <span class="nav-text">操作系统试验（哈工大）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9C%B0%E5%9D%80%E6%98%A0%E5%B0%84%E4%B8%8E%E5%85%B1%E4%BA%AB"><span class="nav-number">1.1.</span> <span class="nav-text">地址映射与共享</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%80%E3%80%81%E5%AE%9E%E9%AA%8C%E5%86%85%E5%AE%B9"><span class="nav-number">1.1.1.</span> <span class="nav-text">一、实验内容</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E8%B7%9F%E8%B8%AA%E5%9C%B0%E5%9D%80%E7%BF%BB%E8%AF%91%E8%BF%87%E7%A8%8B"><span class="nav-number">1.1.1.1.</span> <span class="nav-text">1. 跟踪地址翻译过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%9F%BA%E4%BA%8E%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%E7%9A%84%E7%94%9F%E4%BA%A7%E8%80%85%E2%80%94%E6%B6%88%E8%B4%B9%E8%80%85%E7%A8%8B%E5%BA%8F"><span class="nav-number">1.1.1.2.</span> <span class="nav-text">2. 基于共享内存的生产者—消费者程序</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%E7%9A%84%E5%AE%9E%E7%8E%B0"><span class="nav-number">1.1.1.3.</span> <span class="nav-text">3. 共享内存的实现</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E3%80%81%E5%85%B7%E4%BD%93%E6%AD%A5%E9%AA%A4"><span class="nav-number">1.1.2.</span> <span class="nav-text">二、具体步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-%E8%B7%9F%E8%B8%AA%E5%9C%B0%E5%9D%80%E6%98%A0%E5%B0%84"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">1. 跟踪地址映射</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1%EF%BC%89%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C"><span class="nav-number">1.1.2.1.1.</span> <span class="nav-text">1）准备工作</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2%EF%BC%89%E6%AE%B5%E8%A1%A8"><span class="nav-number">1.1.2.1.2.</span> <span class="nav-text">2）段表</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-%E5%9F%BA%E4%BA%8E%E5%85%B1%E4%BA%AB%E5%86%85%E5%AD%98%E7%9A%84%E7%94%9F%E4%BA%A7%E8%80%85%E2%80%94%E6%B6%88%E8%B4%B9%E8%80%85%E7%A8%8B%E5%BA%8F-1"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">2. 基于共享内存的生产者—消费者程序</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Amerny"
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name">Amerny</p>
+  <div class="site-description" itemprop="description">recording</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">6</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+    
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+<script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Amerny</span>
+</div>
+<div class="powered-by">
+<i class="fa fa-user-md"></i><span id="busuanzi_container_site_uv">
+  本站访客数:<span id="busuanzi_value_site_uv"></span>
+</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://pisces.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Pisces</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script size="300" alpha="0.6" zIndex="-1" src="/lib/canvas-ribbon/canvas-ribbon.js"></script>
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+```jsx
+
+   <canvas class="fireworks" style="position: fixed;left: 0;top: 0;z-index: 1; pointer-events: none;" ></canvas> 
+   <script type="text/javascript" src="//cdn.bootcss.com/animejs/2.2.0/anime.min.js"></script> 
+   <script type="text/javascript" src="/js/src/fireworks.js"></script>
+
+```
+
+</body>
+</html>
